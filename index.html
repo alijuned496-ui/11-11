@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#100b25">
+<title>Project 11:11 — The Wishing Hour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#e8c98c;--lav:#c9b7ff;--ink:#100b25;--white:#fff8f1}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--white);font-family:'DM Sans',sans-serif}
+body:before{content:"";position:fixed;inset:-20%;background:radial-gradient(ellipse at 20% 25%,#49306b66,transparent 38%),radial-gradient(ellipse at 80% 75%,#322a7866,transparent 42%),radial-gradient(ellipse at 50% 50%,#1d1744,transparent 70%);animation:neb 18s ease-in-out infinite alternate;pointer-events:none}
+@keyframes neb{to{transform:translate(3%, -2%) scale(1.08)}}
+#stars{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.65;animation:twinkle 3s infinite ease-in-out alternate}
+@keyframes twinkle{to{opacity:.15;transform:scale(.5)}}
+.scene{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:28px 20px 38px;text-align:center;overflow-y:auto}
+.scene.active{display:flex;animation:appear .75s ease both}
+@keyframes appear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.content{width:min(680px,100%);margin:auto;position:relative;z-index:1}
+.eyebrow{letter-spacing:.32em;text-transform:uppercase;color:var(--gold);font-size:10px;font-weight:600}
+h1,h2{font-family:'Cormorant Garamond',serif;font-weight:400;line-height:.98;margin:18px 0}
+h1{font-size:clamp(48px,11vw,88px)}h2{font-size:clamp(38px,8vw,62px)}
+p{font-size:clamp(14px,3.5vw,17px);line-height:1.85;color:#e9e1f2;margin:18px auto;max-width:560px}
+.script{font-family:'Great Vibes',cursive;color:var(--gold);font-size:clamp(35px,8vw,54px)}
+button{border:1px solid #e8c98c88;background:linear-gradient(135deg,#e8c98c,#b9905a);color:#1a102b;border-radius:999px;padding:13px 24px;font:600 12px 'DM Sans';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin:10px 5px;box-shadow:0 8px 30px #0004}
+button.ghost{background:#ffffff0b;color:var(--white);border-color:#ffffff55;box-shadow:none}
+button:disabled{opacity:.35;cursor:not-allowed}
+.rule{width:70px;height:1px;background:var(--gold);margin:22px auto;opacity:.7}
+.small{font-size:12px;color:#bdb2d2;letter-spacing:.08em}
+#progress{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.2em;color:#bcb0d0;z-index:5}
+#back{position:fixed;top:14px;left:14px;z-index:6;background:#ffffff0b;color:#eee;border:1px solid #ffffff33;padding:9px 14px;font-size:10px}
+.star-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:440px;margin:25px auto}
+.star-card{aspect-ratio:1;border:1px solid #d9c5ff55;border-radius:18px;background:linear-gradient(145deg,#ffffff12,#ffffff04);display:grid;place-items:center;font-size:28px;color:var(--gold);cursor:pointer;transition:.25s}
+.star-card.open{background:#d8c4ff22;border-color:var(--gold);transform:scale(.96)}
+#reveal{min-height:70px;color:var(--gold);font-family:'Cormorant Garamond';font-size:25px;line-height:1.3}
+.wishbox{width:min(500px,100%);min-height:110px;background:#ffffff0b;border:1px solid #d9c5ff55;border-radius:18px;padding:16px;color:white;font:15px 'DM Sans';resize:vertical;outline:none}
+.envelope{width:180px;height:120px;margin:28px auto;background:linear-gradient(145deg,#e8c98c,#a67e4e);position:relative;border-radius:5px;box-shadow:0 15px 45px #0006;cursor:pointer}
+.envelope:before{content:"";position:absolute;inset:0;background:linear-gradient(145deg,transparent 49%,#c29b68 50%),linear-gradient(35deg,transparent 49%,#f0d6a2 50%);clip-path:polygon(0 0,100% 0,50% 65%);filter:brightness(.95)}
+.envelope span{position:absolute;z-index:2;left:0;right:0;top:48px;color:#362343;font-family:'Great Vibes';font-size:29px}
+.letter{display:none;text-align:left;background:#f4e9d7;color:#30233a;border-radius:8px;padding:22px 22px 24px;margin:20px auto;max-width:560px;box-shadow:0 12px 40px #0006;font:16px/1.8 'Cormorant Garamond',serif}
+.letter p{color:#30233a;font:17px/1.8 'Cormorant Garamond',serif;margin:0 0 14px}
+.letter.show{display:block;animation:appear .8s ease}
+@media(max-width:420px){.star-grid{gap:8px}.star-card{border-radius:13px}.scene{padding:24px 17px 42px}}
+
+.constellation{display:none;margin:18px auto 0;padding:16px 10px 12px;border:1px solid #e8c98c66;border-radius:22px;background:radial-gradient(ellipse at center,#8c6ac533,transparent 72%);animation:appear .9s ease}
+.constellation.show{display:block}
+.constellation-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--lav)}
+.constellation svg{width:min(330px,100%);height:auto;margin:8px auto;overflow:visible}
+.constellation polyline{fill:none;stroke:#e8c98c;stroke-width:1.5;stroke-dasharray:500;stroke-dashoffset:500;animation:drawStars 2s ease forwards;filter:drop-shadow(0 0 5px #e8c98c)}
+.constellation circle{fill:#fff8d9;filter:drop-shadow(0 0 7px #e8c98c);animation:twinkle 1.5s infinite alternate}
+@keyframes drawStars{to{stroke-dashoffset:0}}
+.constellation-name{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,9vw,52px);letter-spacing:.22em;color:var(--gold);text-shadow:0 0 18px #e8c98c99}
+.constellation p{font-size:13px;margin:8px auto}
+.future-letter{max-width:520px;padding:13px 17px;border-left:1px solid #e8c98c88;background:#ffffff08;border-radius:0 12px 12px 0;text-align:left}
+.portal-orb{width:150px;height:150px;margin:22px auto;border-radius:50%;display:grid;place-items:center;border:1px solid #e8c98caa;background:radial-gradient(circle,#c9b7ff44 0,#5d3b9466 35%,#17102e 70%);box-shadow:0 0 25px #b99aff66,inset 0 0 25px #e8c98c44;animation:portalPulse 3s ease-in-out infinite}
+.portal-orb:before{content:"";position:absolute;width:174px;height:174px;border:1px solid #c9b7ff66;border-radius:50%;animation:spin 14s linear infinite}
+.portal-orb span{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--gold);letter-spacing:.12em}
+@keyframes portalPulse{50%{transform:scale(1.05);box-shadow:0 0 45px #b99aff99,inset 0 0 35px #e8c98c66}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.reason-list{max-width:510px;margin:18px auto;text-align:left;display:grid;gap:7px}
+.reason-list div{display:flex;gap:13px;align-items:baseline;padding:8px 11px;border:1px solid #ffffff1c;border-radius:10px;background:#ffffff08;color:var(--gold);font-size:11px;letter-spacing:.12em}
+.reason-list span{color:#eee6f5;font-size:13px;letter-spacing:0;line-height:1.45}
+.final-scene{background:radial-gradient(ellipse at 50% 55%,#38245f55,transparent 58%)}
+.galaxy-glow{position:fixed;inset:-20%;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,#9b72d522,transparent 30%),radial-gradient(ellipse at 25% 25%,#e8c98c18,transparent 22%);animation:neb 10s ease-in-out infinite alternate}
+.easter-egg{position:fixed;right:14px;top:14px;z-index:8;margin:0;padding:7px 10px;background:#ffffff08;border:1px solid #e8c98c44;color:#e8c98caa;font-size:9px;letter-spacing:.15em;box-shadow:none;opacity:.55}
+.secret-message{display:none;position:fixed;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);width:min(88vw,430px);padding:24px 20px;border:1px solid #e8c98caa;border-radius:18px;background:#17102bf2;color:#fff4d8;font-family:'Cormorant Garamond',serif;font-size:25px;line-height:1.4;text-align:center;box-shadow:0 0 55px #b99aff66}
+.secret-message.show{display:block;animation:appear .6s ease}
+@media(max-width:420px){.reason-list span{font-size:12px}.reason-list div{padding:7px 9px}}
+
+.launch-gate{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:28px 18px;background:radial-gradient(ellipse at 18% 20%,#49306b88,transparent 42%),radial-gradient(ellipse at 82% 78%,#322a7888,transparent 44%),#100b25;text-align:center;transition:opacity 1s ease,visibility 1s ease}
+.launch-gate.unlocking{opacity:0;visibility:hidden;pointer-events:none}
+.launch-content{width:min(620px,100%);position:relative;z-index:1;margin:auto}
+.launch-mark{font-family:'Cormorant Garamond',serif;color:#c9b7ff;font-size:clamp(25px,6vw,38px);letter-spacing:.38em;margin:24px 0 8px;text-shadow:0 0 22px #c9b7ff88}
+.launch-title{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(48px,11vw,82px);line-height:.92;margin:10px 0 18px;color:#fff8f1}
+.launch-title span{color:#e8c98c}
+.launch-content p{font-size:clamp(14px,3.5vw,17px);line-height:1.8;color:#e9e1f2}
+.launch-date{margin:28px auto 14px;color:#e8c98c;font-size:11px;font-weight:600;letter-spacing:.18em}
+.countdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;width:min(470px,100%);margin:18px auto}
+.countdown div{padding:15px 5px 12px;border:1px solid #d9c5ff55;border-radius:14px;background:linear-gradient(145deg,#ffffff12,#ffffff04);box-shadow:0 8px 28px #0002}
+.countdown strong{display:block;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(30px,8vw,48px);line-height:1.1;color:#fff8f1;font-variant-numeric:tabular-nums}
+.countdown span{display:block;margin-top:7px;color:#c9b7ff;font-size:9px;letter-spacing:.15em}
+.launch-status{color:#bdb2d2;font-size:11px;letter-spacing:.08em;margin-top:18px}
+.launch-stars{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(2px 2px at 12% 24%,#fff,transparent),radial-gradient(1px 1px at 78% 17%,#fff,transparent),radial-gradient(2px 2px at 88% 72%,#fff,transparent),radial-gradient(1px 1px at 32% 82%,#fff,transparent),radial-gradient(1px 1px at 58% 38%,#fff,transparent),radial-gradient(2px 2px at 22% 61%,#fff,transparent);background-size:280px 240px;opacity:.65;animation:twinkle 3s ease-in-out infinite alternate}
+@media(max-width:380px){.countdown{gap:5px}.countdown div{padding:12px 2px 10px}.countdown span{font-size:8px;letter-spacing:.08em}}
+</style>
+</head>
+<body>
+
+<div id="launchGate" class="launch-gate" role="dialog" aria-label="Countdown to the Wishing Hour">
+ <div class="launch-stars" aria-hidden="true"></div>
+ <div class="launch-content">
+  <div class="eyebrow">A little universe is waiting</div>
+  <div class="launch-mark">11:11</div>
+  <h1 class="launch-title">THE<br><span>WISHING HOUR</span></h1>
+  <div class="rule"></div>
+  <p>The stars are getting ready for Anshika.<br>Our little universe opens at the wishing hour.</p>
+  <div class="launch-date">11 NOVEMBER 2026 · 11:11 PM IST</div>
+  <div id="countdown" class="countdown" aria-live="off">
+   <div><strong id="cdDays">00</strong><span>DAYS</span></div>
+   <div><strong id="cdHours">00</strong><span>HOURS</span></div>
+   <div><strong id="cdMinutes">00</strong><span>MINUTES</span></div>
+   <div><strong id="cdSeconds">00</strong><span>SECONDS</span></div>
+  </div>
+  <div id="launchStatus" class="launch-status">Counting down to your moment in the stars ✦</div>
+ </div>
+</div>
+
+<div id="stars"></div>
+<button id="back" class="ghost" style="display:none" onclick="prev()">← BACK</button>
+<div id="s0" class="scene active"><div class="content">
+<div class="eyebrow">A little universe, made for you</div>
+<h1>THE<br><span style="color:var(--gold)">WISHING HOUR</span></h1>
+<div class="rule"></div><div class="script">Project 11:11</div>
+<p>Some wishes are whispered. Some are written in the stars. And some are made for someone who deserves a thousand beautiful beginnings.</p>
+<button onclick="go(1)">ENTER THE WISHING HOUR ✦</button>
+<div class="small">A tiny universe for Anshika</div>
+</div></div>
+<div id="s1" class="scene"><div class="content">
+<div class="eyebrow">Before we begin</div><h2>Make a little room<br>for wonder.</h2>
+<p>The world is much bigger than the things you're worried about today. And there's so much of it waiting for you.</p>
+<p>So tonight, don't think about what hasn't happened yet. Think about everything that still can.</p>
+<button onclick="go(2)">I'M READY</button>
+</div></div>
+<div id="s2" class="scene"><div class="content">
+<div class="eyebrow">11 little stars · 11 little wishes</div><h2>Find your stars.</h2>
+<p>Tap every star. Each one is holding a wish meant for you.</p>
+<div class="star-grid" id="starGrid"></div>
+<div id="reveal">Choose a star ✧</div>
+<div class="small" id="count">0 / 11 discovered</div>
+<button id="constellationButton" disabled onclick="revealConstellation()">REVEAL THE CONSTELLATION ✦</button>
+<div id="constellation" class="constellation" aria-live="polite">
+ <div class="constellation-title">The stars have been waiting to spell one name...</div>
+ <svg viewBox="0 0 330 150" role="img" aria-label="A glowing constellation spelling Anshika">
+  <polyline points="18,92 48,42 82,82 112,30 143,82 174,40 205,84 238,30 270,78 310,44"/>
+  <g><circle cx="18" cy="92" r="4"/><circle cx="48" cy="42" r="4"/><circle cx="82" cy="82" r="4"/><circle cx="112" cy="30" r="4"/><circle cx="143" cy="82" r="4"/><circle cx="174" cy="40" r="4"/><circle cx="205" cy="84" r="4"/><circle cx="238" cy="30" r="4"/><circle cx="270" cy="78" r="4"/><circle cx="310" cy="44" r="4"/></g>
+ </svg>
+ <div class="constellation-name">ANSHIKA</div>
+ <p>Eleven wishes. One very special name. A whole sky made just for you.</p>
+ <button onclick="go(3)">MAKE YOUR WISH ✧</button>
+</div>
+<button id="starNext" disabled onclick="go(3)" style="display:none">CONTINUE</button>
+</div></div>
+<div id="s3" class="scene"><div class="content">
+<div class="eyebrow">Your turn</div><h2>Now make a wish.</h2>
+<p>It doesn't have to be realistic. It doesn't have to make sense to anyone else. Just let yourself want something beautiful.</p>
+<textarea id="wish" class="wishbox" placeholder="If the universe is listening..."></textarea>
+<p class="small">This wish stays right here, with you.</p>
+<button onclick="go(4)">KEEP THIS WISH ✦</button>
+</div></div>
+<div id="s4" class="scene"><div class="content">
+<div class="eyebrow">One last thing</div><h2>A letter, from me to you.</h2>
+<p>There's something I wanted you to read slowly. Tap the envelope whenever you're ready.</p>
+<div class="envelope" onclick="openLetter()"><span>For Anshika</span></div>
+<div class="letter" id="letter">
+<p>Anshika,</p>
+<p>Nd yeah I really love you nd will keep keep doing it .... Anshika u were my 11:11 wish</p>
+<p>I don't know what the universe has written for you. I don't know which roads will surprise you, which dreams will take longer, or what the next chapter will look like.</p>
+<p>But I hope you never stop believing that beautiful things are possible for you. I hope you keep finding reasons to be curious, keep chasing the things that make your eyes light up, and keep becoming someone you're proud of.</p>
+<p>The world is much bigger than the things you're worried about today. There's so much waiting beyond the things you can see right now. I hope you get to experience all of it.</p>
+<p>And whenever life feels a little too loud, I hope you remember that you are allowed to pause, breathe, begin again, and take your time.</p>
+<p>Keep growing, Anshika. Keep wishing. Keep being you.</p>
+<p style="text-align:right;font-family:'Great Vibes';font-size:29px;color:#8d6a9d">With love ✦</p>
+</div>
+<button onclick="go(5)">OPEN THE NEXT SECRET ✦</button>
+</div></div>
+<div id="s5" class="scene"><div class="content">
+<div class="eyebrow">A message from somewhere ahead</div>
+<h2>Dear Anshika,<br><span style="color:var(--gold)">from your future self.</span></h2>
+<div class="rule"></div>
+<p class="future-letter">I know you have questions about how everything will turn out. I wish I could show you every beautiful thing waiting around the corner, but then you would miss the magic of discovering it yourself.</p>
+<p class="future-letter">Keep going at your own pace. The little steps count. The things you are learning, the dreams you are carrying, and the person you are becoming all matter more than you realise.</p>
+<p class="future-letter">One day, you'll look back and feel proud that you kept making room for hope. Until then, stay curious, be kind to yourself, and don't stop imagining what is possible.</p>
+<div class="script">With love, a little further along the way ✦</div>
+<button onclick="go(6)">STEP THROUGH 11:11</button>
+</div></div>
+
+<div id="s6" class="scene"><div class="content">
+<div class="eyebrow">The portal is open</div><h2>The 11:11<br><span style="color:var(--gold)">portal.</span></h2>
+<div class="portal-orb" aria-hidden="true"><span>11:11</span></div>
+<p>Eleven little reminders for the moments when you need to believe in beautiful possibilities.</p>
+<div class="reason-list">
+<div>01 <span>You can begin again, as many times as you need.</span></div>
+<div>02 <span>Your dreams are allowed to grow with you.</span></div>
+<div>03 <span>Small steps can lead to extraordinary places.</span></div>
+<div>04 <span>You do not need every answer today.</span></div>
+<div>05 <span>Your curiosity can open unexpected doors.</span></div>
+<div>06 <span>There is more than one way to make a beautiful life.</span></div>
+<div>07 <span>You deserve friendships that feel like sunshine.</span></div>
+<div>08 <span>Rest is part of the journey, too.</span></div>
+<div>09 <span>You can be proud of progress nobody else sees.</span></div>
+<div>10 <span>Wonderful surprises can arrive in ordinary moments.</span></div>
+<div>11 <span>Your story has so many pages left to write.</span></div>
+</div>
+<button onclick="go(7)">REVEAL THE FINAL SKY ✦</button>
+</div></div>
+
+<div id="s7" class="scene final-scene"><div class="galaxy-glow"></div><div class="content">
+<div class="eyebrow">End of transmission · beginning of everything</div>
+<h1 style="font-size:clamp(44px,10vw,78px)">Keep looking<br><span style="color:var(--gold)">up.</span></h1>
+<div class="script">Your universe is still unfolding.</div>
+<p>May the things you wish for find their way to you. And may the things you haven't even thought to wish for turn out to be wonderful.</p>
+<div class="rule"></div><div class="eyebrow">11:11 · always make a wish</div>
+<button onclick="go(0)">REVISIT THE STARS</button>
+</div></div>
+<button id="easterEgg" class="easter-egg" aria-label="A tiny 11:11 symbol">11:11</button>
+<div id="secretMessage" class="secret-message" role="status" aria-live="polite">You found the wish that was hiding in plain sight.</div>
+<div id="progress">01 / 08</div>
+<script>
+
+// The launch moment is fixed to India Standard Time (UTC+05:30).
+// If the page is opened after this moment, the experience starts immediately.
+const launchMoment = new Date('2026-11-11T23:11:00+05:30').getTime();
+const launchGate = document.getElementById('launchGate');
+let countdownInterval;
+
+function unlockWishingHour(){
+ if(countdownInterval) clearInterval(countdownInterval);
+ document.getElementById('launchStatus').textContent='The wishing hour is here. ✦';
+ launchGate.classList.add('unlocking');
+ setTimeout(()=>{
+  launchGate.style.display='none';
+  const gateScene=document.getElementById('s0');
+  if(gateScene){
+   document.querySelectorAll('.scene').forEach(scene=>scene.classList.remove('active'));
+   gateScene.classList.add('active');
+  }
+  if(typeof current!=='undefined') current=0;
+  const progress=document.getElementById('progress');
+  if(progress) progress.textContent='01 / 08';
+  const back=document.getElementById('back');
+  if(back) back.style.display='none';
+ },1050);
+}
+
+function updateCountdown(){
+ const remaining=launchMoment-Date.now();
+ if(remaining<=0){
+  ['cdDays','cdHours','cdMinutes','cdSeconds'].forEach(id=>document.getElementById(id).textContent='00');
+  unlockWishingHour();
+  return;
+ }
+ const days=Math.floor(remaining/86400000);
+ const hours=Math.floor((remaining%86400000)/3600000);
+ const minutes=Math.floor((remaining%3600000)/60000);
+ const seconds=Math.floor((remaining%60000)/1000);
+ document.getElementById('cdDays').textContent=String(days).padStart(2,'0');
+ document.getElementById('cdHours').textContent=String(hours).padStart(2,'0');
+ document.getElementById('cdMinutes').textContent=String(minutes).padStart(2,'0');
+ document.getElementById('cdSeconds').textContent=String(seconds).padStart(2,'0');
+}
+updateCountdown();
+if(Date.now()>=launchMoment){
+ unlockWishingHour();
+}else{
+ countdownInterval=setInterval(updateCountdown,1000);
+}
+
+
+const wishes=[
+"May you find the courage to begin, even when the whole path isn't visible yet.",
+"May your hard work meet the opportunities it deserves.",
+"May you never make yourself smaller to fit into a world that hasn't caught up with you.",
+"May you find people who celebrate your interests instead of asking you to outgrow them.",
+"May your curiosity take you to places you never imagined.",
+"May the dreams you are quietly working for become stories you proudly tell.",
+"May you always have a reason to laugh until your cheeks hurt.",
+"May you be gentle with yourself on the days when progress feels slow.",
+"May you discover new music, new places, new ideas, and new versions of yourself.",
+"May life surprise you in the softest, most beautiful ways.",
+"May you never forget how much possibility is still ahead of you."
+];
+let opened=new Set(),current=0;
+const grid=document.getElementById('starGrid');
+wishes.forEach((w,i)=>{let b=document.createElement('button');b.className='star-card';b.textContent='✦';b.setAttribute('aria-label','Star '+(i+1));b.onclick=()=>{opened.add(i);b.classList.add('open');b.textContent='✧';document.getElementById('reveal').textContent=w;document.getElementById('count').textContent=opened.size+' / 11 discovered';document.getElementById('starNext').disabled=opened.size!==11;document.getElementById('constellationButton').disabled=opened.size!==11};grid.appendChild(b)});
+function go(n){document.getElementById('s'+current).classList.remove('active');current=n;document.getElementById('s'+current).classList.add('active');document.getElementById('progress').textContent=String(n+1).padStart(2,'0')+' / 08';document.getElementById('back').style.display=n>0?'block':'none'}
+function prev(){if(current>0)go(current-1)}
+function openLetter(){document.getElementById('letter').classList.add('show')}
+
+function revealConstellation(){
+ if(opened.size!==11)return;
+ document.getElementById('constellation').classList.add('show');
+ document.getElementById('constellationButton').style.display='none';
+ document.getElementById('reveal').textContent='All eleven stars have found their place.';
+}
+let eggTaps=0,eggTimer;
+document.getElementById('easterEgg').addEventListener('click',()=>{
+ eggTaps++;
+ clearTimeout(eggTimer);
+ if(eggTaps>=11){
+  document.getElementById('secretMessage').classList.add('show');
+  eggTaps=0;
+ }else{eggTimer=setTimeout(()=>eggTaps=0,3000);}
+});
+document.getElementById('secretMessage').addEventListener('click',()=>{
+ document.getElementById('secretMessage').classList.remove('show');
+});
+
+for(let i=0;i<100;i++){let s=document.createElement('i');s.className='star';s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.animationDelay=(Math.random()*4)+'s';s.style.opacity=(.2+Math.random()*.7);document.getElementById('stars').appendChild(s)}
+</script>
+</body></html>
